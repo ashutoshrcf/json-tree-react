@@ -1,0 +1,955 @@
+{
+  "Connections": [
+    { "HI": "BYE" },
+    {
+      "connectionType": "delta_writer",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "Delta write parameters",
+        "componentCategory": "target",
+        "componentType": "delta_writer",
+        "displayName": "Delta",
+        "attributes": [
+          {
+            "attributeName": "mode",
+            "displayName": "Mode",
+            "description": "Whether to perform latest snapshot or compute history",
+            "type": {
+              "objectType": "options",
+              "values": [
+                {
+                  "value": "latest",
+                  "displayValue": "Latest"
+                },
+                {
+                  "value": "history",
+                  "overwrite": "History"
+                },
+                {
+                  "value": "snapshot_history",
+                  "displayValue": "Snapshot history"
+                }
+              ]
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "s3_bucket",
+            "displayName": "Target S3 bucket",
+            "description": "Source S3 bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{data_bucket}}"
+          },
+          {
+            "attributeName": "s3_layer_path",
+            "displayName": "Target s3 path",
+            "description": "Source S3 path in S3 source bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{s3_paths.b_path}}"
+          },
+          {
+            "attributeName": "num_partitions",
+            "displayName": "Number of partitions",
+            "description": "Tells Spark to repartition data to the given number.<br/>Set this value to 1 if you want to produce a single output file",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "dynamic_partitions",
+            "displayName": "Dynamic partitions",
+            "description": "Overrides dynamic_partitions configured at Table config",
+            "type": {
+              "objectType": "list",
+              "elementTypes": {
+                "objectType": "string"
+              }
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "delay_after_write",
+            "displayName": "Delay after write",
+            "description": "Seconds to sleep after write. Obsolete parameter",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false,
+            "value": 0
+          },
+          {
+            "attributeName": "enable_partitions",
+            "displayName": "Enable dynamic partitioning",
+            "description": "Enable dynamic partitioning",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "schema_evolution",
+            "displayName": "Schema evolution",
+            "description": "Works only in mode `latest` and `snapshot_history`, allows automatic schema evolution",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": true
+          },
+          {
+            "attributeName": "create_catalog_table",
+            "displayName": "Create catalog table",
+            "description": "Whether to create delta table in the glue catalog",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "create_manifest_table",
+            "displayName": "Create manifest table",
+            "description": "Create manifest files and manifest table in the glue catalog for readers that don't support reading Delta Lake directly.",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "manifest_table_name_format",
+            "displayName": "Manifest table name format",
+            "description": "Custom name of the manifest table, can be formatted using the `{table_name}` substring",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{table_name}}_manifest "
+          },
+          {
+            "attributeName": "custom_table_properties",
+            "displayName": "Custom table properties",
+            "description": "User-defined key-value pairs to be set in `TBLPROPERTIES`. If value is null, the property is unset",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "values_for_invalidation",
+            "displayName": "Values for invalidation",
+            "description": "These values are used to ensure idempotency for history, snapshot_history and append modes. In case of a job restart, you do not want to have duplicated data, so we need a way how to recognize a particular ingest data. The default value corresponds to the `static_partitions` that is usually present in the configuration (unless removed by the user). Framework encloses strings in quotes, other measures are the users' responsibility to make this convertible to valid SQL. What we do: (`key1` = 'value1') AND (`key2` = 'value2')",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "target_table",
+            "displayName": "Target table",
+            "description": "Target table name",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "table_comment",
+            "displayName": "Table comment",
+            "description": "Overrides the same configuration from the table section",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "database_name",
+            "displayName": "Database name",
+            "description": "Target database name",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "recompute_history_hashes",
+            "displayName": "Recompute history hashes",
+            "description": "If set on True, the hashes in the existing history table are recomputed. This option can be useful if you decide to change which columns are used for hashing, or if there is a change in the hash computation in our code",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "update_glue_description",
+            "displayName": "Update glue description",
+            "description": "Updates glue table description parameter in glue catalog. Available only for glue catalog",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "connectionType": "dynamo_db",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "Dynamo db parameters",
+        "componentCategory": "target",
+        "componentType": "dynamo_db",
+        "displayName": "Dynamo DB",
+        "attributes": [
+          {
+            "attributeName": "create_table_options",
+            "displayName": "Create table options",
+            "description": "These options will be used for creation of new DynamoDB table in case that target table does not exist",
+            "type": {
+              "objectType": "object",
+              "attributes": [
+                {
+                  "attributeName": "billing_mode",
+                  "displayName": "Billing mode",
+                  "description": "Controls how you are charged for read and write throughput and how you manage capacity",
+                  "type": {
+                    "objectType": "options",
+                    "values": [
+                      {
+                        "value": "PROVISIONED",
+                        "displayValue": "provisioned"
+                      },
+                      {
+                        "value": "PAY_PER_REQUEST",
+                        "displayValue": "pay per request"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "attributeName": "attribute_definitions",
+                  "displayName": "Attribute definitions",
+                  "description": "An array of attributes that describe the key schema for the table and indexes",
+                  "type": {
+                    "objectType": "list",
+                    "elementTypes": {
+                      "objectType": "object",
+                      "attributes": [
+                        {
+                          "attributeName": "AttributeName",
+                          "displayName": "Attribute name String",
+                          "description": "Name of attribute",
+                          "type": {
+                            "objectType": "string"
+                          }
+                        },
+                        {
+                          "attributeName": "AttributeType",
+                          "displayName": "Attribute type",
+                          "description": "Type of attributes. Possible values: <br/>- S - the attribute is of type String<br/>- N - the attribute is of type Number<br/>- B - the attribute is of type Binary",
+                          "type": {
+                            "objectType": "options",
+                            "values": [
+                              {
+                                "value": "S",
+                                "displayValue": "String"
+                              },
+                              {
+                                "value": "N",
+                                "overwrite": "Number"
+                              },
+                              {
+                                "value": "B",
+                                "displayValue": "Binary"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "attributeName": "key_schema",
+                  "displayName": "Key schema",
+                  "description": "Specifies the attributes that make up the primary key for a table or an index.",
+                  "type": {
+                    "objectType": "list",
+                    "elementTypes": {
+                      "objectType": "object",
+                      "attributes": [
+                        {
+                          "attributeName": "AttributeName",
+                          "displayName": "Attribute name",
+                          "description": "Name of attribute",
+                          "type": {
+                            "objectType": "string"
+                          }
+                        },
+                        {
+                          "attributeName": "KeyType",
+                          "displayName": "Key type",
+                          "description": "The role that the key attribute will assume. Possible values: <br/>- HASH - partition key<br/>- RANGE - sort key",
+                          "type": {
+                            "objectType": "options",
+                            "values": [
+                              {
+                                "value": "HASH",
+                                "displayValue": "Partition key"
+                              },
+                              {
+                                "value": "RANGE",
+                                "overwrite": "Sort key"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "attributeName": "tags",
+                  "displayName": "Tags",
+                  "description": "List of table tags",
+                  "type": {
+                    "objectType": "list",
+                    "elementTypes": {
+                      "objectType": "object",
+                      "attributes": [
+                        {
+                          "attributeName": "Key",
+                          "displayName": "Key",
+                          "description": "Tag key",
+                          "type": {
+                            "objectType": "string"
+                          }
+                        },
+                        {
+                          "attributeName": "Value",
+                          "displayName": "Value",
+                          "description": "Tag value",
+                          "type": {
+                            "objectType": "string"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "spark_write_dynamo_db_options",
+            "displayName": "Spark write dynamo db options",
+            "description": "Custom writer format specific options",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "target_table",
+            "displayName": "Target tablet",
+            "description": "Name of table in dynamo db where the data will be saved.<br/>If that's not specified, then the name of the table",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false
+          }
+        ]
+      }
+    },
+    {
+      "connectionType": "jdbc",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "Target JDBC parameters",
+        "componentCategory": "target",
+        "componentType": "jdbc",
+        "displayName": "JDBC",
+        "attributes": [
+          {
+            "attributeName": "mode",
+            "displayName": "Mode",
+            "description": "Write mode: append, overwrite, error (alias errorifexists) or ignore",
+            "type": {
+              "objectType": "options",
+              "values": [
+                {
+                  "value": "append",
+                  "displayValue": "Append"
+                },
+                {
+                  "value": "overwrite",
+                  "overwrite": "Overwrite"
+                },
+                {
+                  "value": "error",
+                  "displayValue": "Error"
+                },
+                {
+                  "value": "ignore",
+                  "displayValue": "Ignore"
+                }
+              ]
+            },
+            "value": "overwrite",
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "jdbc_user",
+            "displayName": "JDBC user",
+            "description": "JDBC username",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_password",
+            "displayName": "JDBC password",
+            "description": "JDBC password",
+            "type": {
+              "objectType": "secret",
+              "secretName": "{{dataset_name}}-jdbc-secret",
+              "secretKey": "password"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_host",
+            "displayName": "JDBC host",
+            "description": "Host of a database server",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_port",
+            "displayName": "JDBC port",
+            "description": "Port of a database server",
+            "type": {
+              "objectType": "number",
+              "scale": "7",
+              "precision": "0"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_database",
+            "displayName": "JDBC database",
+            "description": "Database name",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_url_format",
+            "displayName": "JDBC url format",
+            "description": "Template on a connection string. The following patterns may be used inside:<br/>   - {jdbc_host}<br/>   - {jdbc_port}<br/>   - {jdbc_database}<br/>   - {jdbc_user}<br/>   - {jdbc_password}<br/>",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_url",
+            "displayName": "JDBC url",
+            "description": "A database connection string",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_driver",
+            "displayName": "JDBC driver",
+            "description": "A driver class name to use. For instance: oracle.jdbc.OracleDriver<br/>  Not needed for drivers based on JDBC 4.0 and above (auto load feature)",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "jdbc_custom_format",
+            "displayName": "JDBC custom format",
+            "description": "A custom format can be configured in order to properly handle various data types",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "spark_writer_jdbc_options",
+            "displayName": "Spark writer jdbc options",
+            "description": "Spark jdbc write options. For complete list of options see [JDBC spark documentation](https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.DataFrameWriter.jdbc.html)",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "column_names_to_upper_case",
+            "displayName": "Convert column names to upper case",
+            "description": "Convert name of columns to upper case. It is mutually exclusive with option column_names_to_lower_case)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "column_names_to_lower_case",
+            "displayName": "Convert column names to lower case",
+            "description": "Convert name of columns to lower case. It is mutually exclusive with option column_names_to_upper_case)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "connectionType": "redshift",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "Target Redshift parameters",
+        "componentCategory": "target",
+        "componentType": "redshift",
+        "displayName": "Redshift",
+        "attributes": [
+          {
+            "attributeName": "mode",
+            "displayName": "Mode",
+            "description": "Write mode: append, overwrite, error (alias errorifexists) or ignore",
+            "type": {
+              "objectType": "options",
+              "values": [
+                {
+                  "value": "append",
+                  "displayValue": "Append"
+                },
+                {
+                  "value": "overwrite",
+                  "overwrite": "Overwrite"
+                },
+                {
+                  "value": "error",
+                  "displayValue": "Error"
+                },
+                {
+                  "value": "ignore",
+                  "displayValue": "Ignore"
+                }
+              ]
+            },
+            "value": "overwrite",
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "rs_user",
+            "displayName": "User",
+            "description": "Redshift username",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_password",
+            "displayName": "Redshift password",
+            "description": "Redshift password",
+            "type": {
+              "objectType": "secret",
+              "secretName": "{{dataset_name}}-redshift-secret",
+              "secretKey": "password"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_host",
+            "displayName": "Redshift host",
+            "description": "Host of a database server",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_port",
+            "displayName": "Redshift port",
+            "description": "Port of a database server",
+            "type": {
+              "objectType": "number",
+              "scale": "7",
+              "precision": "0"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_database",
+            "displayName": "Redshift database",
+            "description": "Redshift database name",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_iam_role",
+            "displayName": "Redshift IAM role",
+            "description": "Provide redshift IAM role which needs to be used to write/copy data into target redshift db",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "rs_url",
+            "displayName": "Redshift url",
+            "description": "The Redshift database connection string",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": true
+          },
+          {
+            "attributeName": "s3_bucket",
+            "displayName": "Temporary S3 bucket",
+            "description": "Temporarily land data from source to s3 bucket",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": false,
+            "value": "{{data_bucket}}"
+          },
+          {
+            "attributeName": "s3_layer_path",
+            "displayName": "Temporary s3 path",
+            "description": "Temporary s3 prefix in above s3 bucket to store data before it gets copied to redshift. Not necessary to have it in place and can be created by framework at run time",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": false,
+            "value": "{{s3_paths.b_path}}"
+          },
+          {
+            "attributeName": "rs_custom_format",
+            "displayName": "Redshift url format",
+            "description": "Template on a connection string. The following patterns may be used inside:<br/>   - {rs_host}<br/>   - {rs_port}<br/>   - {rs_database}<br/>   - {rs_user}<br/>   - {rs_password}",
+            "type": {
+              "objectType": "string"
+            },
+            "isOverwritable": false,
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "spark_writer_redshift_options",
+            "displayName": "Spark writer redshift options",
+            "description": "Spark redshift write options. For complete list of options see [Redshift spark documentation](https://docs.databricks.com/data/data-sources/aws/amazon-redshift.html#language-python)",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "column_names_to_upper_case",
+            "displayName": "Convert column names to upper case",
+            "description": "Convert name of columns to upper case. It is mutually exclusive with option column_names_to_lower_case)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "column_names_to_lower_case",
+            "displayName": "Convert column names to lower case",
+            "description": "Convert name of columns to lower case. It is mutually exclusive with option column_names_to_upper_case)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          }
+        ]
+      }
+    },
+    {
+      "connectionType": "csv",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "CSV to S3 parameters",
+        "componentCategory": "target",
+        "componentType": "csv",
+        "displayName": "CSV to S3",
+        "attributes": [
+          {
+            "attributeName": "mode",
+            "displayName": "Mode",
+            "description": "Write mode: append, overwrite, error (alias errorifexists) or ignore",
+            "type": {
+              "objectType": "options",
+              "values": [
+                {
+                  "value": "append",
+                  "displayValue": "Append"
+                },
+                {
+                  "value": "overwrite",
+                  "overwrite": "Overwrite"
+                },
+                {
+                  "value": "error",
+                  "displayValue": "Error"
+                },
+                {
+                  "value": "ignore",
+                  "displayValue": "Ignore"
+                }
+              ]
+            },
+            "value": "overwrite",
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "spark_write_csv_options",
+            "displayName": "Spark write csv options",
+            "description": "Other options for Spark CSV writer<br/>For complete list of Spark CSV writer options see [Spark documentation](https://spark.apache.org/docs/3.1.1/api/python/reference/api/pyspark.sql.DataFrameWriter.csv.html)",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "s3_bucket",
+            "displayName": "Target S3 bucket",
+            "description": "Source S3 bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{data_bucket}}"
+          },
+          {
+            "attributeName": "s3_layer_path",
+            "displayName": "Target s3 path",
+            "description": "Source S3 path in S3 source bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{s3_paths.b_path}}"
+          },
+          {
+            "attributeName": "static_file_location",
+            "displayName": "Static file location",
+            "description": "Set this value to true (to eliminate static partitions from the target path)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "num_partitions",
+            "displayName": "Number of partitions",
+            "description": "Tells Spark to repartition data to the given number.<br/>Set this value to 1 if you want to produce a single output file",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "dynamic_partitions",
+            "displayName": "Dynamic partitions",
+            "description": "Overrides dynamic_partitions configured at Table config",
+            "type": {
+              "objectType": "list",
+              "elementTypes": {
+                "objectType": "string"
+              }
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "delay_after_write",
+            "displayName": "Delay after write",
+            "description": "Seconds to sleep after write. Obsolete parameter",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false,
+            "value": 0
+          },
+          {
+            "attributeName": "custom_format_options",
+            "displayName": "Custom format options",
+            "description": "Custom writer format specific options",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          }
+        ]
+      }
+    },
+    {
+      "connectionType": "parquet",
+      "supportedDataTypes": [],
+      "isSource": "false",
+      "isTarget": "true",
+      "definition": {
+        "title": "Parquet to S3 parameters",
+        "componentCategory": "target",
+        "componentType": "parquet",
+        "displayName": "Parquet to S3",
+        "attributes": [
+          {
+            "attributeName": "mode",
+            "displayName": "Mode",
+            "description": "Write mode: append, overwrite, error (alias errorifexists) or ignore",
+            "type": {
+              "objectType": "options",
+              "values": [
+                {
+                  "value": "append",
+                  "displayValue": "Append"
+                },
+                {
+                  "value": "overwrite",
+                  "overwrite": "Overwrite"
+                },
+                {
+                  "value": "error",
+                  "displayValue": "Error"
+                },
+                {
+                  "value": "ignore",
+                  "displayValue": "Ignore"
+                }
+              ]
+            },
+            "value": "overwrite",
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "s3_bucket",
+            "displayName": "Target S3 bucket",
+            "description": "Target S3 bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{data_bucket}}"
+          },
+          {
+            "attributeName": "s3_layer_path",
+            "displayName": "Target s3 path",
+            "description": "Target S3 path in S3 source bucket where data will be stored",
+            "type": {
+              "objectType": "string"
+            },
+            "isBasicAttribute": false,
+            "value": "{{s3_paths.c_path}}"
+          },
+          {
+            "attributeName": "static_file_location",
+            "displayName": "Static file location",
+            "description": "Set this value to true (to eliminate static partitions from the target path)",
+            "type": {
+              "objectType": "boolean"
+            },
+            "isBasicAttribute": false,
+            "value": false
+          },
+          {
+            "attributeName": "num_partitions",
+            "displayName": "Number of partitions",
+            "description": "Tells Spark to repartition data to the given number.<br/>Set this value to 1 if you want to produce a single output file",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false
+          },
+          {
+            "attributeName": "delay_after_write",
+            "displayName": "Delay after write",
+            "description": "Seconds to sleep after write. Obsolete parameter",
+            "type": {
+              "objectType": "number",
+              "scale": 10,
+              "precision": 0
+            },
+            "isBasicAttribute": false,
+            "value": 0
+          },
+          {
+            "attributeName": "custom_format_options",
+            "displayName": "Custom format options",
+            "description": "Custom writer format specific options",
+            "type": {
+              "objectType": "dictionary"
+            },
+            "isBasicAttribute": false
+          }
+        ]
+      }
+    }
+  ]
+}
